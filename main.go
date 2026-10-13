@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"log"
 
-	. "github.com/VladislavTroyan163/POST-request-generation-script/createrequest"
+	. "github.com/VladislavTroyan163/POST-request-generation-script/createRequests"
 )
 
 func main() {
 	лицевойСчет := 924126
 
-	request, err := CreateRequest(лицевойСчет)
+	request, err := CreateRequestChangeSupplier(лицевойСчет)
 	if err != nil {
 		log.Fatal(err)
 	}

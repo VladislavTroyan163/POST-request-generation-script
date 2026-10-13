@@ -1,4 +1,4 @@
-package createrequest
+package createRequests
 
 import (
 	"encoding/json"
@@ -100,7 +100,7 @@ func createInfo() Info {
 	return InfoData
 }
 
-func CreateRequest(лицевойСчет int) (string, error) {
+func CreateRequestChangeSupplier(лицевойСчет int) (string, error) {
 	ParamsData := createParams(лицевойСчет)
 	TasksData := createTasks(ParamsData)
 	InfoData := createInfo()
@@ -112,7 +112,7 @@ func CreateRequest(лицевойСчет int) (string, error) {
 
 	jsonRequest, err := json.Marshal(Request)
 	if err != nil {
-		return "", fmt.Errorf("createRequest: ошибка сериализации: %w", err)
+		return "", fmt.Errorf("CreateRequestChangeSupplier: ошибка сериализации: %w", err)
 	}
 
 	return string(jsonRequest), nil
