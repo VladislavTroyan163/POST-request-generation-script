@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	. "github.com/VladislavTroyan163/POST-request-generation-script/config"
 )
 
 type Response struct {
@@ -21,34 +23,35 @@ type ResponseResult struct {
 }
 
 func ExecuteRequestChangeSupplier(request string, лицевойСчет int) (resultRequest string, err error) {
-
-	token := ""
-	serverURL := ""
+	config, err := ReadConfig()
+	if err != nil {
+		return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: \n%w", err)
+	}
 
 	body := strings.NewReader(request)
 	req, err := http.NewRequest(
 		http.MethodPost,
-		serverURL,
+		config.ServerURL,
 		body,
 	)
 	if err != nil {
-		return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: %w", err)
+		return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: \n%w", err)
 	}
 
-	req.Header.Set("s-access-token", token)
+	req.Header.Set("s-access-token", config.Token)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: %w", err)
+		return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: \n%w", err)
 	}
 	defer resp.Body.Close()
 
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: %w", err)
+		return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: \n%w", err)
 	}
 
 	var response Response
@@ -57,7 +60,7 @@ func ExecuteRequestChangeSupplier(request string, лицевойСчет int) (r
 	case 200:
 		err = json.Unmarshal(responseBody, &response)
 		if err != nil {
-			return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: %w", err)
+			return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: \n%w", err)
 		}
 		resultRequest = fmt.Sprintln(
 			"\nHTTP-запрос завершился успешно:", resp.Status,

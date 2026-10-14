@@ -3,14 +3,8 @@ package createRequests
 import (
 	"encoding/json"
 	"fmt"
-)
 
-const (
-	датаНачала              = "2026-10-01T00:00:00.000"
-	датаКонца               = "2045-05-09T00:00:00.000"
-	поставщикиСписок        = "25429"
-	услугиСписокПоставщиков = "139067"
-	workMonth               = "2026-09-01T00:00:00.000"
+	. "github.com/VladislavTroyan163/POST-request-generation-script/config"
 )
 
 type Request struct {
@@ -61,27 +55,35 @@ type Info struct {
 	WorkMonth string `json:"workMonth"`
 }
 
-func createЗапись(лицевойСчет int) Запись {
+func createЗапись(лицевойСчет int) (Запись, error) {
+	config, err := ReadConfig()
+	if err != nil {
+		return Запись{}, fmt.Errorf("createЗапись: ошибка чтения конфигурации: \n%w", err)
+	}
+
 	ЗаписьData := Запись{
 		НомерЗаписи:             -1,
 		ЕстьИзменения:           true,
 		СчетСписокПоставщиков:   лицевойСчет,
-		ДатНач:                  датаНачала,
-		ДатКнц:                  датаКонца,
-		ПоставщикиСписок:        поставщикиСписок,
-		УслугиСписокПоставщиков: услугиСписокПоставщиков,
+		ДатНач:                  config.ДатаНачала,
+		ДатКнц:                  config.ДатаКонца,
+		ПоставщикиСписок:        config.ПоставщикиСписок,
+		УслугиСписокПоставщиков: config.УслугиСписокПоставщиков,
 	}
-	return ЗаписьData
+	return ЗаписьData, nil
 }
 
-func createParams(лицевойСчет int) Params {
-	ЗаписьData := createЗапись(лицевойСчет)
+func createParams(лицевойСчет int) (Params, error) {
+	ЗаписьData, err := createЗапись(лицевойСчет)
+	if err != nil {
+		return Params{}, err
+	}
 
 	ParamsData := Params{
 		Запись:   ЗаписьData,
 		Владелец: лицевойСчет,
 	}
-	return ParamsData
+	return ParamsData, nil
 }
 
 func createTasks(params Params) Tasks {
@@ -93,18 +95,27 @@ func createTasks(params Params) Tasks {
 	return TasksData
 }
 
-func createInfo() Info {
-	InfoData := Info{
-		WorkMonth: workMonth,
+func createInfo() (Info, error) {
+	config, err := ReadConfig()
+	if err != nil {
+		return Info{}, fmt.Errorf("createInfo: ошибка чтения конфигурации: \n%w", err)
 	}
-	return InfoData
+	InfoData := Info{
+		WorkMonth: config.WorkMonth,
+	}
+	return InfoData, nil
 }
 
 func CreateRequestChangeSupplier(лицевойСчет int) (string, error) {
-	ParamsData := createParams(лицевойСчет)
+	ParamsData, err := createParams(лицевойСчет)
+	if err != nil {
+		return "", fmt.Errorf("CreateRequestChangeSupplier: ошибка чтения конфигурации: \n%w", err)
+	}
 	TasksData := createTasks(ParamsData)
-	InfoData := createInfo()
-
+	InfoData, err := createInfo()
+	if err != nil {
+		return "", fmt.Errorf("CreateRequestChangeSupplier: ошибка чтения конфигурации: \n%w", err)
+	}
 	Request := Request{
 		Tasks: []Tasks{TasksData},
 		Info:  InfoData,
@@ -112,7 +123,7 @@ func CreateRequestChangeSupplier(лицевойСчет int) (string, error) {
 
 	jsonRequest, err := json.Marshal(Request)
 	if err != nil {
-		return "", fmt.Errorf("CreateRequestChangeSupplier: ошибка сериализации: %w", err)
+		return "", fmt.Errorf("CreateRequestChangeSupplier: ошибка сериализации: \n%w", err)
 	}
 
 	return string(jsonRequest), nil
