@@ -2,19 +2,23 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
 	. "github.com/VladislavTroyan163/POST-request-generation-script/createRequests"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/executeRequests"
+	. "github.com/VladislavTroyan163/POST-request-generation-script/logger"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/registry"
 )
 
 func main() {
+	logger, logFile := CreateLogger()
+	defer logFile.Close()
+
 	sliceЛицевыхСчетов, err := ReadRegistry()
 	if err != nil {
-		log.Fatal(err)
+		logger.Println(err)
+		return
 	}
 
 	workersCount := 30
@@ -23,7 +27,7 @@ func main() {
 		workersCount = len(sliceЛицевыхСчетов)
 	}
 	if workersCount == 0 {
-		fmt.Println("Реестр пуст")
+		logger.Println("Реестр пуст")
 		return
 	}
 
@@ -42,24 +46,24 @@ func main() {
 
 				request, err := CreateRequestChangeSupplier(лицевойСчет)
 				if err != nil {
-					log.Printf(
+					logger.Printf(
 						"ЛС %d: ошибка создания запроса: %v",
 						лицевойСчет, err)
-					continue
+					break
 				}
 
 				resultRequest, err := ExecuteRequestChangeSupplier(request, лицевойСчет)
 
 				elapsed := time.Since(start)
 				if err != nil {
-					log.Printf(
-						"ЛС %d: ошибка HTTP-запроса: %v",
+					logger.Printf(
+						"ЛС %d: ошибка HTTP-запроса: %v \n\n",
 						лицевойСчет, err)
 					continue
 				}
-				fmt.Printf(
-					"ЛС: %d | Результат: %v | Время: %v\n",
-					лицевойСчет,
+				fmt.Println("Результат запроса:", resultRequest)
+				logger.Printf(
+					"Результат: %vВремя выполнения запроса: %v\n\n",
 					resultRequest,
 					elapsed,
 				)
@@ -74,7 +78,7 @@ func main() {
 
 	wg.Wait()
 
-	fmt.Printf("Всего обработано заданий: %d\n",
+	logger.Printf("Всего обработано заданий: %d\n",
 		len(sliceЛицевыхСчетов))
-	fmt.Printf("Общее время: %v\n", time.Since(startAll))
+	logger.Printf("Общее время: %v\n", time.Since(startAll))
 }
