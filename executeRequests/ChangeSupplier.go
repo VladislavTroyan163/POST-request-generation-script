@@ -22,12 +22,7 @@ type ResponseResult struct {
 	НомерЗаписи int `json:"номерЗаписи"`
 }
 
-func ExecuteRequestChangeSupplier(request string, лицевойСчет int) (resultRequest string, err error) {
-	config, err := ReadConfig()
-	if err != nil {
-		return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: \n%w", err)
-	}
-
+func ExecuteRequestChangeSupplier(request string, лицевойСчет int, config Config, token string) (resultRequest string, err error) {
 	body := strings.NewReader(request)
 	req, err := http.NewRequest(
 		http.MethodPost,
@@ -38,7 +33,7 @@ func ExecuteRequestChangeSupplier(request string, лицевойСчет int) (r
 		return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: \n%w", err)
 	}
 
-	req.Header.Set("s-access-token", config.Token)
+	req.Header.Set("s-access-token", token)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}

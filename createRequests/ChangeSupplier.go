@@ -55,12 +55,7 @@ type Info struct {
 	WorkMonth string `json:"workMonth"`
 }
 
-func createЗапись(лицевойСчет int) (Запись, error) {
-	config, err := ReadConfig()
-	if err != nil {
-		return Запись{}, fmt.Errorf("createЗапись: ошибка чтения конфигурации: \n%w", err)
-	}
-
+func createЗапись(лицевойСчет int, config Config) (Запись, error) {
 	ЗаписьData := Запись{
 		НомерЗаписи:             -1,
 		ЕстьИзменения:           true,
@@ -73,8 +68,8 @@ func createЗапись(лицевойСчет int) (Запись, error) {
 	return ЗаписьData, nil
 }
 
-func createParams(лицевойСчет int) (Params, error) {
-	ЗаписьData, err := createЗапись(лицевойСчет)
+func createParams(лицевойСчет int, config Config) (Params, error) {
+	ЗаписьData, err := createЗапись(лицевойСчет, config)
 	if err != nil {
 		return Params{}, err
 	}
@@ -95,24 +90,20 @@ func createTasks(params Params) Tasks {
 	return TasksData
 }
 
-func createInfo() (Info, error) {
-	config, err := ReadConfig()
-	if err != nil {
-		return Info{}, fmt.Errorf("createInfo: ошибка чтения конфигурации: \n%w", err)
-	}
+func createInfo(config Config) (Info, error) {
 	InfoData := Info{
 		WorkMonth: config.WorkMonth,
 	}
 	return InfoData, nil
 }
 
-func CreateRequestChangeSupplier(лицевойСчет int) (string, error) {
-	ParamsData, err := createParams(лицевойСчет)
+func CreateRequestChangeSupplier(лицевойСчет int, config Config) (string, error) {
+	ParamsData, err := createParams(лицевойСчет, config)
 	if err != nil {
 		return "", fmt.Errorf("CreateRequestChangeSupplier: ошибка чтения конфигурации: \n%w", err)
 	}
 	TasksData := createTasks(ParamsData)
-	InfoData, err := createInfo()
+	InfoData, err := createInfo(config)
 	if err != nil {
 		return "", fmt.Errorf("CreateRequestChangeSupplier: ошибка чтения конфигурации: \n%w", err)
 	}

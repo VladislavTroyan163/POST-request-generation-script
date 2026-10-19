@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	. "github.com/VladislavTroyan163/POST-request-generation-script/config"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/createRequests"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/executeRequests"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/logger"
@@ -15,13 +16,30 @@ func main() {
 	logger, logFile := CreateLogger()
 	defer logFile.Close()
 
+	config, err := ReadConfig()
+	if err != nil {
+		fmt.Println("main: ошибка чтения конфигурации: \n%w", err)
+		return
+	}
+
 	sliceЛицевыхСчетов, err := ReadRegistry()
 	if err != nil {
 		logger.Println(err)
 		return
 	}
 
-	workersCount := 30
+	requestAuthorization, err := CreateRequestAuthorization()
+	if err != nil {
+		fmt.Println("main: ошибка при создании запроса авторизации: \n%w", err)
+		return
+	}
+	tokenAuthorization, err := ExecuteRequestAuthorization(requestAuthorization, config)
+	if err != nil {
+		fmt.Println("main: ошибка при выполнении запроса авторизации: \n%w", err)
+		return
+	}
+
+	workersCount := config.WorkersCount
 
 	if len(sliceЛицевыхСчетов) < workersCount {
 		workersCount = len(sliceЛицевыхСчетов)
@@ -44,7 +62,7 @@ func main() {
 				start := time.Now()
 				лицевойСчет := sliceЛицевыхСчетов[i].Row_id
 
-				request, err := CreateRequestChangeSupplier(лицевойСчет)
+				request, err := CreateRequestChangeSupplier(лицевойСчет, config)
 				if err != nil {
 					logger.Printf(
 						"ЛС %d: ошибка создания запроса: %v",
@@ -52,7 +70,7 @@ func main() {
 					break
 				}
 
-				resultRequest, err := ExecuteRequestChangeSupplier(request, лицевойСчет)
+				resultRequest, err := ExecuteRequestChangeSupplier(request, лицевойСчет, config, tokenAuthorization)
 
 				elapsed := time.Since(start)
 				if err != nil {

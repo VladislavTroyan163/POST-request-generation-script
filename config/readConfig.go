@@ -8,7 +8,8 @@ import (
 
 type Config struct {
 	ServerURL               string `json:"serverURL"`
-	Token                   string `json:"token"`
+	ServerURLAuthorization  string `json:"serverURLAuthorization"`
+	WorkersCount            int    `json:"workersCount"`
 	ДатаНачала              string `json:"датаНачала"`
 	ДатаКонца               string `json:"датаКонца"`
 	ПоставщикиСписок        string `json:"поставщикиСписок"`
