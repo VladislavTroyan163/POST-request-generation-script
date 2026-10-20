@@ -16,9 +16,9 @@ func ReadRegistry(mode string) ([]Rows_ids, error) {
 
 	switch mode {
 	case "UL":
-		filePath = "registry\\registryFL.json"
-	case "FL":
 		filePath = "registry\\registryUL.json"
+	case "FL":
+		filePath = "registry\\registryFL.json"
 	default:
 		return []Rows_ids{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \nНе верно указан mode.")
 	}
