@@ -18,9 +18,9 @@ type Config struct {
 	WorkMonth               string `json:"workMonth"`
 }
 
-func ReadConfig() (Config, error) {
+func ReadConfig(nameFileConfig string) (Config, error) {
 	var config Config
-	file, err := os.OpenFile("config\\config.json", os.O_RDWR, 0644)
+	file, err := os.OpenFile(nameFileConfig, os.O_RDWR, 0644)
 	if err != nil {
 		return Config{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \n%w", err)
 	}

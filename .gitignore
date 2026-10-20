@@ -1,5 +1,6 @@
 .vscode
-config/config.json
+config/configFL.json
+config/configUL.json
 registry/registryFL.json
 registry/registryUL.json
 logger/processing.log

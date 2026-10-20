@@ -16,7 +16,7 @@ func main() {
 	logger, logFile := CreateLogger()
 	defer logFile.Close()
 
-	config, err := ReadConfig()
+	config, err := ReadConfig("config\\configUL.json")
 	if err != nil {
 		fmt.Println("main: ошибка чтения конфигурации: \n%w", err)
 		return
