@@ -10,10 +10,20 @@ type Rows_ids struct {
 	Row_id int `json:"row_id"`
 }
 
-func ReadRegistry() ([]Rows_ids, error) {
+func ReadRegistry(mode string) ([]Rows_ids, error) {
 	var ObjectsRow_id []Rows_ids
+	var filePath string
 
-	file, err := os.OpenFile("registry\\registry.json", os.O_RDWR, 0644)
+	switch mode {
+	case "UL":
+		filePath = "registry\\registryFL.json"
+	case "FL":
+		filePath = "registry\\registryUL.json"
+	default:
+		return []Rows_ids{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \nНе верно указан mode.")
+	}
+
+	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
 	if err != nil {
 		return []Rows_ids{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \n%w", err)
 	}

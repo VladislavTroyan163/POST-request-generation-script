@@ -10,6 +10,7 @@ type Config struct {
 	ServerURL               string `json:"serverURL"`
 	ServerURLAuthorization  string `json:"serverURLAuthorization"`
 	WorkersCount            int    `json:"workersCount"`
+	Mode                    string `json:"mode"`
 	ДатаНачала              string `json:"датаНачала"`
 	ДатаКонца               string `json:"датаКонца"`
 	ПоставщикиСписок        string `json:"поставщикиСписок"`

@@ -22,7 +22,7 @@ func main() {
 		return
 	}
 
-	sliceЛицевыхСчетов, err := ReadRegistry()
+	sliceЛицевыхСчетов, err := ReadRegistry(config.Mode)
 	if err != nil {
 		logger.Println(err)
 		return
