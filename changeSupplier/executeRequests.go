@@ -1,4 +1,4 @@
-package executeRequests
+package changesupplier
 
 import (
 	"encoding/json"
@@ -6,8 +6,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	. "github.com/VladislavTroyan163/POST-request-generation-script/config"
 )
 
 type Response struct {
@@ -23,10 +21,18 @@ type ResponseResult struct {
 }
 
 func ExecuteRequestChangeSupplier(request string, лицевойСчет int, config Config, token string) (resultRequest string, err error) {
+	serverURL := ""
+	switch config.ConfigApp.Mode {
+	case "FL":
+		serverURL = config.ConfigApp.ServerURLFL
+	case "UL":
+		serverURL = config.ConfigApp.ServerURLUL
+	}
+
 	body := strings.NewReader(request)
 	req, err := http.NewRequest(
 		http.MethodPost,
-		config.ServerURL,
+		serverURL,
 		body,
 	)
 	if err != nil {
