@@ -5,12 +5,12 @@ import (
 	"sync"
 	"time"
 
-	authorizationpack "github.com/VladislavTroyan163/POST-request-generation-script/authorization"
-	changesupplierspack "github.com/VladislavTroyan163/POST-request-generation-script/changesupplier"
 	configpack "github.com/VladislavTroyan163/POST-request-generation-script/config"
-	createregistryofidspack "github.com/VladislavTroyan163/POST-request-generation-script/createregistryofids"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/logger"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/registry"
+	authorizationpack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/authorization"
+	changesupplierspack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/changesupplier"
+	createregistryofidspack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/createregistryofids"
 )
 
 func main() {
