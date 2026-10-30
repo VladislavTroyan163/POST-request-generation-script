@@ -17,15 +17,15 @@ type ConfigApp struct {
 
 func ReadConfigApp() (ConfigApp, error) {
 	var config ConfigApp
-	file, err := os.OpenFile("configProgram.json", os.O_RDWR, 0644)
+	file, err := os.OpenFile("config2/configProgram.json", os.O_RDWR, 0644)
 	if err != nil {
-		return ConfigApp{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \n%w", err)
+		return ConfigApp{}, fmt.Errorf("ReadConfigApp: ошибка чтения конфигурации: \n%w", err)
 	}
 	defer file.Close()
 
 	err = json.NewDecoder(file).Decode(&config)
 	if err != nil {
-		return ConfigApp{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \n%w", err)
+		return ConfigApp{}, fmt.Errorf("ReadConfigApp: ошибка чтения конфигурации: \n%w", err)
 	}
 	return config, nil
 }

@@ -7,6 +7,7 @@ import (
 
 	. "github.com/VladislavTroyan163/POST-request-generation-script/config"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/createRequests"
+	createregistryofidspack "github.com/VladislavTroyan163/POST-request-generation-script/createregistryofids"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/executeRequests"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/logger"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/registry"
@@ -18,7 +19,7 @@ func main() {
 
 	config, err := ReadConfig("config\\configUL.json")
 	if err != nil {
-		fmt.Println("main: ошибка чтения конфигурации: \n%w", err)
+		fmt.Println("main: ошибка чтения конфигурации: \n", err)
 		return
 	}
 
@@ -30,12 +31,12 @@ func main() {
 
 	requestAuthorization, err := CreateRequestAuthorization()
 	if err != nil {
-		fmt.Println("main: ошибка при создании запроса авторизации: \n%w", err)
+		fmt.Println("main: ошибка при создании запроса авторизации: \n", err)
 		return
 	}
 	tokenAuthorization, err := ExecuteRequestAuthorization(requestAuthorization, config)
 	if err != nil {
-		fmt.Println("main: ошибка при выполнении запроса авторизации: \n%w", err)
+		fmt.Println("main: ошибка при выполнении запроса авторизации: \n", err)
 		return
 	}
 
@@ -99,4 +100,12 @@ func main() {
 	logger.Printf("Всего обработано заданий: %d\n",
 		len(sliceЛицевыхСчетов))
 	logger.Printf("Общее время: %v\n", time.Since(startAll))
+
+	configCreateRegistryOfIDs, err := createregistryofidspack.ReadConfig()
+	if err != nil {
+		fmt.Println("main: ошибка чтения конфигурации: \n", err)
+		return
+	}
+	Request, err := createregistryofidspack.CreateRequestСreateRegistryOfIDs(3128055, configCreateRegistryOfIDs)
+	fmt.Println(Request)
 }
