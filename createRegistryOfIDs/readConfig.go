@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	configAppPack "github.com/VladislavTroyan163/POST-request-generation-script/config2"
+	configAppPack "github.com/VladislavTroyan163/POST-request-generation-script/config"
 )
 
 type Config struct {

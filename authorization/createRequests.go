@@ -1,4 +1,4 @@
-package createRequests
+package authorization
 
 import (
 	"encoding/json"

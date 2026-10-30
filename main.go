@@ -5,42 +5,52 @@ import (
 	"sync"
 	"time"
 
-	. "github.com/VladislavTroyan163/POST-request-generation-script/config"
-	. "github.com/VladislavTroyan163/POST-request-generation-script/createRequests"
+	authorizationpack "github.com/VladislavTroyan163/POST-request-generation-script/authorization"
+	changesupplierspack "github.com/VladislavTroyan163/POST-request-generation-script/changesupplier"
+	configpack "github.com/VladislavTroyan163/POST-request-generation-script/config"
 	createregistryofidspack "github.com/VladislavTroyan163/POST-request-generation-script/createregistryofids"
-	. "github.com/VladislavTroyan163/POST-request-generation-script/executeRequests"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/logger"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/registry"
 )
 
 func main() {
+	//Создание логирования
 	logger, logFile := CreateLogger()
 	defer logFile.Close()
 
-	config, err := ReadConfig("config\\configUL.json")
+	//Чтение конфига приложения
+	configApp, err := configpack.ReadConfigApp()
 	if err != nil {
-		fmt.Println("main: ошибка чтения конфигурации: \n", err)
+		fmt.Println("main: ошибка чтения конфигурации приложения: \n", err)
 		return
 	}
 
-	sliceЛицевыхСчетов, err := ReadRegistry(config.Mode)
+	//Чтение реестра лицевых счетов
+	sliceЛицевыхСчетов, err := ReadRegistry(configApp.Mode)
 	if err != nil {
 		logger.Println(err)
 		return
 	}
 
-	requestAuthorization, err := CreateRequestAuthorization()
+	//Авторизация: конфигурация, формирование запроса, выполнение запроса.
+	configAuthorization, err := authorizationpack.ReadConfig()
+	if err != nil {
+		fmt.Println("main: ошибка чтения конфигурации: \n", err)
+		return
+	}
+	requestAuthorization, err := authorizationpack.CreateRequestAuthorization()
 	if err != nil {
 		fmt.Println("main: ошибка при создании запроса авторизации: \n", err)
 		return
 	}
-	tokenAuthorization, err := ExecuteRequestAuthorization(requestAuthorization, config)
+	tokenAuthorization, err := authorizationpack.ExecuteRequestAuthorization(requestAuthorization, configAuthorization)
 	if err != nil {
 		fmt.Println("main: ошибка при выполнении запроса авторизации: \n", err)
 		return
 	}
 
-	workersCount := config.WorkersCount
+	//Установка количества потоков
+	workersCount := configApp.WorkersCount
 
 	if len(sliceЛицевыхСчетов) < workersCount {
 		workersCount = len(sliceЛицевыхСчетов)
@@ -49,6 +59,15 @@ func main() {
 		logger.Println("Реестр пуст")
 		return
 	}
+
+	//----------------------------
+
+	configChangeSuppliers, err := changesupplierspack.ReadConfig()
+	if err != nil {
+		fmt.Println("main: ошибка чтения конфигурации: \n", err)
+		return
+	}
+	//-------------
 
 	var wg sync.WaitGroup
 	jobs := make(chan int)
@@ -63,7 +82,7 @@ func main() {
 				start := time.Now()
 				лицевойСчет := sliceЛицевыхСчетов[i].Row_id
 
-				request, err := CreateRequestChangeSupplier(лицевойСчет, config)
+				request, err := changesupplierspack.CreateRequestChangeSupplier(лицевойСчет, configChangeSuppliers)
 				if err != nil {
 					logger.Printf(
 						"ЛС %d: ошибка создания запроса: %v",
@@ -71,7 +90,7 @@ func main() {
 					break
 				}
 
-				resultRequest, err := ExecuteRequestChangeSupplier(request, лицевойСчет, config, tokenAuthorization)
+				resultRequest, err := changesupplierspack.ExecuteRequestChangeSupplier(request, лицевойСчет, configChangeSuppliers, tokenAuthorization)
 
 				elapsed := time.Since(start)
 				if err != nil {

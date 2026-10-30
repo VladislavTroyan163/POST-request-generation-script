@@ -1,10 +1,8 @@
-package createRequests
+package changesupplier
 
 import (
 	"encoding/json"
 	"fmt"
-
-	. "github.com/VladislavTroyan163/POST-request-generation-script/config"
 )
 
 type Request struct {
@@ -56,14 +54,32 @@ type Info struct {
 }
 
 func createЗапись(лицевойСчет int, config Config) (Запись, error) {
+	датаНачала := ""
+	датаКонца := ""
+	поставщикиСписок := ""
+	услугиСписокПоставщиков := ""
+
+	switch config.ConfigApp.Mode {
+	case "FL":
+		датаНачала = config.ConfigRequest.датаНачалаFL
+		датаКонца = config.ConfigRequest.датаКонцаFL
+		поставщикиСписок = config.ConfigRequest.поставщикиСписокFL
+		услугиСписокПоставщиков = config.ConfigRequest.услугиСписокПоставщиковFL
+	case "UL":
+		датаНачала = config.ConfigRequest.датаНачалаUL
+		датаКонца = config.ConfigRequest.датаКонцаUL
+		поставщикиСписок = config.ConfigRequest.поставщикиСписокUL
+		услугиСписокПоставщиков = config.ConfigRequest.услугиСписокПоставщиковUL
+	}
+
 	ЗаписьData := Запись{
 		НомерЗаписи:             -1,
 		ЕстьИзменения:           true,
 		СчетСписокПоставщиков:   лицевойСчет,
-		ДатНач:                  config.ДатаНачала,
-		ДатКнц:                  config.ДатаКонца,
-		ПоставщикиСписок:        config.ПоставщикиСписок,
-		УслугиСписокПоставщиков: config.УслугиСписокПоставщиков,
+		ДатНач:                  датаНачала,
+		ДатКнц:                  датаКонца,
+		ПоставщикиСписок:        поставщикиСписок,
+		УслугиСписокПоставщиков: услугиСписокПоставщиков,
 	}
 	return ЗаписьData, nil
 }
@@ -92,7 +108,7 @@ func createTasks(params Params) Tasks {
 
 func createInfo(config Config) (Info, error) {
 	InfoData := Info{
-		WorkMonth: config.WorkMonth,
+		WorkMonth: config.ConfigApp.WorkMonth,
 	}
 	return InfoData, nil
 }

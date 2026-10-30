@@ -1,4 +1,4 @@
-package executeRequests
+package authorization
 
 import (
 	"encoding/json"
@@ -6,8 +6,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	. "github.com/VladislavTroyan163/POST-request-generation-script/config"
 )
 
 type AuthorizationResponse struct {
@@ -43,7 +41,7 @@ func ExecuteRequestAuthorization(request string, config Config) (resultRequest s
 	body := strings.NewReader(request)
 	req, err := http.NewRequest(
 		http.MethodPost,
-		config.ServerURLAuthorization,
+		config.ConfigApp.ServerURLAuthorization,
 		body,
 	)
 	if err != nil {
