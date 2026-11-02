@@ -1,9 +1,9 @@
 package registry
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
+
+	"github.com/xuri/excelize/v2"
 )
 
 type Rows_ids struct {
@@ -12,26 +12,13 @@ type Rows_ids struct {
 
 func ReadRegistry(mode string) ([]Rows_ids, error) {
 	var ObjectsRow_id []Rows_ids
-	var filePath string
+	filePath := "registry/registry.xlsx"
 
-	switch mode {
-	case "UL":
-		filePath = "registry\\registryUL.json"
-	case "FL":
-		filePath = "registry\\registryFL.json"
-	default:
-		return []Rows_ids{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \nНе верно указан mode.")
-	}
-
-	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
+	file, err := excelize.OpenFile(filePath)
 	if err != nil {
-		return []Rows_ids{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \n%w", err)
+		return []Rows_ids{}, fmt.Errorf("ReadRegistry: ошибка чтения реестра: \n%w", err)
 	}
 	defer file.Close()
 
-	err = json.NewDecoder(file).Decode(&ObjectsRow_id)
-	if err != nil {
-		return []Rows_ids{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \n%w", err)
-	}
 	return ObjectsRow_id, nil
 }

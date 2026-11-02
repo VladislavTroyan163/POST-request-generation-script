@@ -1,1 +1,1 @@
-package createregistryofids
+package createRegistryOfIDs

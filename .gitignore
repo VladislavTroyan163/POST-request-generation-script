@@ -1,6 +1,7 @@
 .vscode
 configProgram.json
 configRequest.json
+registry.xlsx
 registry/registryFL.json
 registry/registryUL.json
 logger/processing.log

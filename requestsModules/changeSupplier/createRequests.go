@@ -1,4 +1,4 @@
-package changesupplier
+package changeSupplier
 
 import (
 	"encoding/json"
