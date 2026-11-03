@@ -61,15 +61,15 @@ func createЗапись(лицевойСчет int, config Config) (Запись
 
 	switch config.ConfigApp.Mode {
 	case "FL":
-		датаНачала = config.ConfigRequest.датаНачалаFL
-		датаКонца = config.ConfigRequest.датаКонцаFL
-		поставщикиСписок = config.ConfigRequest.поставщикиСписокFL
-		услугиСписокПоставщиков = config.ConfigRequest.услугиСписокПоставщиковFL
+		датаНачала = config.ConfigRequest.ДатаНачалаFL
+		датаКонца = config.ConfigRequest.ДатаКонцаFL
+		поставщикиСписок = config.ConfigRequest.ПоставщикиСписокFL
+		услугиСписокПоставщиков = config.ConfigRequest.УслугиСписокПоставщиковFL
 	case "UL":
-		датаНачала = config.ConfigRequest.датаНачалаUL
-		датаКонца = config.ConfigRequest.датаКонцаUL
-		поставщикиСписок = config.ConfigRequest.поставщикиСписокUL
-		услугиСписокПоставщиков = config.ConfigRequest.услугиСписокПоставщиковUL
+		датаНачала = config.ConfigRequest.ДатаНачалаUL
+		датаКонца = config.ConfigRequest.ДатаКонцаUL
+		поставщикиСписок = config.ConfigRequest.ПоставщикиСписокUL
+		услугиСписокПоставщиков = config.ConfigRequest.УслугиСписокПоставщиковUL
 	}
 
 	ЗаписьData := Запись{

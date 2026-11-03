@@ -26,7 +26,7 @@ func main() {
 	}
 
 	//Чтение реестра лицевых счетов
-	sliceЛицевыхСчетов, err := ReadRegistry(configApp.Mode)
+	sliceЛицевыхСчетов, err := ReadRegistry(configApp.Mode, "registryLs.xlsx", 1, "Номер ЛС")
 	if err != nil {
 		logger.Println(err)
 		return
