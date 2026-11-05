@@ -3,6 +3,5 @@ configProgram.json
 configRequest.json
 registryLs.xlsx
 registryTu.xlsx
-registry/registryFL.json
-registry/registryUL.json
+registryMeter.xlsx
 logger/processing.log

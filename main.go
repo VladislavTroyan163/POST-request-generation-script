@@ -7,16 +7,17 @@ import (
 
 	configpack "github.com/VladislavTroyan163/POST-request-generation-script/config"
 	. "github.com/VladislavTroyan163/POST-request-generation-script/logger"
-	. "github.com/VladislavTroyan163/POST-request-generation-script/registry"
+	. "github.com/VladislavTroyan163/POST-request-generation-script/registries"
 	authorizationpack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/authorization"
-	changesupplierspack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/changesupplier"
-	createregistryofidspack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/createregistryofids"
+	changesupplierspack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/changeSupplier"
+	createregistryofidspack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/createRegistryOfIDs"
 )
 
 func main() {
 	//Создание логирования
 	logger, logFile := CreateLogger()
 	defer logFile.Close()
+	//----------------------------------------------------------------------------------
 
 	//Чтение конфига приложения
 	configApp, err := configpack.ReadConfigApp()
@@ -24,13 +25,7 @@ func main() {
 		fmt.Println("main: ошибка чтения конфигурации приложения: \n", err)
 		return
 	}
-
-	//Чтение реестра лицевых счетов
-	sliceЛицевыхСчетов, err := ReadRegistry(configApp.Mode, "registryLs.xlsx", 1, "Номер ЛС")
-	if err != nil {
-		logger.Println(err)
-		return
-	}
+	//----------------------------------------------------------------------------------
 
 	//Авторизация: конфигурация, формирование запроса, выполнение запроса.
 	configAuthorization, err := authorizationpack.ReadConfig()
@@ -48,29 +43,53 @@ func main() {
 		fmt.Println("main: ошибка при выполнении запроса авторизации: \n", err)
 		return
 	}
+	//----------------------------------------------------------------------------------
+
+	//Чтение реестра лицевых счетов
+	registryNumber, err := ReadRegistry(configApp.Mode, "registryLs.xlsx", 1, "Номер ЛС")
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+	//----------------------------------------------------------------------------------
 
 	//Установка количества потоков
 	workersCount := configApp.WorkersCount
 
-	if len(sliceЛицевыхСчетов) < workersCount {
-		workersCount = len(sliceЛицевыхСчетов)
+	if len(registryNumber) < workersCount {
+		workersCount = len(registryNumber)
 	}
 	if workersCount == 0 {
 		logger.Println("Реестр пуст")
 		return
 	}
+	//----------------------------------------------------------------------------------
 
-	//----------------------------
+	//Перевод объектов реестра в формат списка row_id
+
+	// тут надо создать воркеры по анаогии
+	configCreateRegistryOfIDs, err := createregistryofidspack.ReadConfig()
+	if err != nil {
+		fmt.Println("main: ошибка чтения конфигурации: \n", err)
+		return
+	}
+	rowIDs := createregistryofidspack.CreateWorkersCreateRegistryOfIDs(
+		registryNumber,
+		workersCount,
+		configCreateRegistryOfIDs,
+		tokenAuthorization,
+	)
+	fmt.Print(rowIDs)
+	//----------------------------------------------------------------------------------
+
+	var wg sync.WaitGroup
+	jobs := make(chan int)
 
 	configChangeSuppliers, err := changesupplierspack.ReadConfig()
 	if err != nil {
 		fmt.Println("main: ошибка чтения конфигурации: \n", err)
 		return
 	}
-	//-------------
-
-	var wg sync.WaitGroup
-	jobs := make(chan int)
 
 	startAll := time.Now()
 
@@ -80,7 +99,7 @@ func main() {
 			defer wg.Done()
 			for i := range jobs {
 				start := time.Now()
-				лицевойСчет := sliceЛицевыхСчетов[i].Row_id
+				лицевойСчет := registryNumber[i].Numbers_ls
 
 				request, err := changesupplierspack.CreateRequestChangeSupplier(лицевойСчет, configChangeSuppliers)
 				if err != nil {
@@ -109,7 +128,7 @@ func main() {
 		}()
 	}
 
-	for i := range sliceЛицевыхСчетов {
+	for i := range registryNumber {
 		jobs <- i
 	}
 	close(jobs)
@@ -117,14 +136,6 @@ func main() {
 	wg.Wait()
 
 	logger.Printf("Всего обработано заданий: %d\n",
-		len(sliceЛицевыхСчетов))
+		len(registryNumber))
 	logger.Printf("Общее время: %v\n", time.Since(startAll))
-
-	configCreateRegistryOfIDs, err := createregistryofidspack.ReadConfig()
-	if err != nil {
-		fmt.Println("main: ошибка чтения конфигурации: \n", err)
-		return
-	}
-	Request, err := createregistryofidspack.CreateRequestСreateRegistryOfIDs(3128055, configCreateRegistryOfIDs)
-	fmt.Println(Request)
 }
