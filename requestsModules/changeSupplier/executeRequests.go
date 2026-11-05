@@ -1,4 +1,4 @@
-package changesupplier
+package changeSupplier
 
 import (
 	"encoding/json"
@@ -66,10 +66,6 @@ func ExecuteRequestChangeSupplier(request string, лицевойСчет int, co
 		resultRequest = fmt.Sprintln(
 			"\nHTTP-запрос завершился успешно:", resp.Status,
 			"\nНомер записи в таблице \"Поставщики\":", response.Tasks[0].Result.НомерЗаписи,
-			"\nrow_id лицевого счета:", лицевойСчет)
-	case 401:
-		resultRequest = fmt.Sprintln(
-			"Ошибка авторизации:", resp.Status,
 			"\nrow_id лицевого счета:", лицевойСчет)
 	default:
 		resultRequest = fmt.Sprintln(

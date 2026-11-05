@@ -1,4 +1,4 @@
-package createregistryofids
+package createRegistryOfIDs
 
 import (
 	"encoding/json"
@@ -23,7 +23,7 @@ func ReadConfig() (Config, error) {
 	}
 
 	var configRequest ConfigRequest
-	file, err := os.OpenFile("createRegistryOfIDs/configRequest.json", os.O_RDWR, 0644)
+	file, err := os.OpenFile("requestsModules/createRegistryOfIDs/configRequest.json", os.O_RDWR, 0644)
 	if err != nil {
 		return Config{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \n%w", err)
 	}

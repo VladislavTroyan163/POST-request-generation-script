@@ -1,4 +1,4 @@
-package changesupplier
+package changeSupplier
 
 import (
 	"encoding/json"
@@ -14,14 +14,14 @@ type Config struct {
 }
 
 type ConfigRequest struct {
-	датаНачалаFL              string
-	датаНачалаUL              string
-	датаКонцаFL               string
-	датаКонцаUL               string
-	поставщикиСписокFL        string
-	поставщикиСписокUL        string
-	услугиСписокПоставщиковFL string
-	услугиСписокПоставщиковUL string
+	ДатаНачалаFL              string `json:"датаНачалаFL"`
+	ДатаНачалаUL              string `json:"датаНачалаUL"`
+	ДатаКонцаFL               string `json:"датаКонцаFL"`
+	ДатаКонцаUL               string `json:"датаКонцаUL"`
+	ПоставщикиСписокFL        string `json:"поставщикиСписокFL"`
+	ПоставщикиСписокUL        string `json:"поставщикиСписокUL"`
+	УслугиСписокПоставщиковFL string `json:"услугиСписокПоставщиковFL"`
+	УслугиСписокПоставщиковUL string `json:"услугиСписокПоставщиковUL"`
 }
 
 func ReadConfig() (Config, error) {
@@ -31,7 +31,7 @@ func ReadConfig() (Config, error) {
 	}
 
 	var configRequest ConfigRequest
-	file, err := os.OpenFile("changeSupplier/configRequest.json", os.O_RDWR, 0644)
+	file, err := os.OpenFile("requestsModules/changeSupplier/configRequest.json", os.O_RDWR, 0644)
 	if err != nil {
 		return Config{}, fmt.Errorf("readConfig: ошибка чтения конфигурации: \n%w", err)
 	}

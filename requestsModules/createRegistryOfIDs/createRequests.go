@@ -1,4 +1,4 @@
-package createregistryofids
+package createRegistryOfIDs
 
 import (
 	"encoding/json"
