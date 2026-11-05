@@ -1,9 +1,7 @@
 package createRegistryOfIDs
 
 import (
-	"fmt"
 	"sync"
-	"time"
 
 	registriespack "github.com/VladislavTroyan163/POST-request-generation-script/registries"
 )
@@ -25,7 +23,7 @@ func CreateWorkersCreateRegistryOfIDs(
 			defer wg.Done()
 			for i := range jobs {
 				лицевойСчет := 0
-				start := time.Now()
+				// start := time.Now()
 				switch configCreateRegistryOfIDs.ConfigApp.Mode {
 				case "FL":
 					лицевойСчет = registryNumber[i].Numbers_ls
@@ -40,16 +38,14 @@ func CreateWorkersCreateRegistryOfIDs(
 
 				_, row_id, err := ExecuteRequestcreateRegistryOfIDs(requestNumbers, лицевойСчет, configCreateRegistryOfIDs, tokenAuthorization)
 
-				elapsed := time.Since(start)
-				if err != nil {
-					continue
-				}
+				// elapsed := time.Since(start)
+				// if err != nil {
+				// 	continue
+				// }
 
 				mu.Lock()
 				rowIDs = append(rowIDs, row_id)
 				mu.Unlock()
-
-				fmt.Println("Результат запроса:", elapsed)
 			}
 		}()
 	}

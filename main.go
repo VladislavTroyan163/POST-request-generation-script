@@ -66,8 +66,6 @@ func main() {
 	//----------------------------------------------------------------------------------
 
 	//Перевод объектов реестра в формат списка row_id
-
-	// тут надо создать воркеры по анаогии
 	configCreateRegistryOfIDs, err := createregistryofidspack.ReadConfig()
 	if err != nil {
 		fmt.Println("main: ошибка чтения конфигурации: \n", err)
@@ -99,7 +97,7 @@ func main() {
 			defer wg.Done()
 			for i := range jobs {
 				start := time.Now()
-				лицевойСчет := registryNumber[i].Numbers_ls
+				лицевойСчет := rowIDs[i]
 
 				request, err := changesupplierspack.CreateRequestChangeSupplier(лицевойСчет, configChangeSuppliers)
 				if err != nil {
