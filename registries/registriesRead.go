@@ -23,7 +23,7 @@ func ReadRegistry(mode string, fileName string, sheetNum int, colName string) ([
 		filePath = fmt.Sprint("registries/registryLs/", fileName)
 	case "UL":
 		filePath = fmt.Sprint("registries/registryTu/", fileName)
-	case "METER":
+	case "ASD":
 		filePath = fmt.Sprint("registries/registryMeter/", fileName)
 	}
 
@@ -73,7 +73,7 @@ func ReadRegistry(mode string, fileName string, sheetNum int, colName string) ([
 			if numbersStr == "" {
 				continue
 			}
-			if mode == "METER" {
+			if mode == "ASD" {
 				resultNumbers = append(resultNumbers, Numbers{Numbers_meter: numbersStr})
 				continue
 			}

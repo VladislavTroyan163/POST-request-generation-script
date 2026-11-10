@@ -1,7 +1,10 @@
 .vscode
+
 configProgram.json
 configRequest.json
-registryLs.xlsx
-registryTu.xlsx
-registryMeter.xlsx
+
+registries/registryLs/*
+registries/registryTu/*
+registries/registryMeter/*
+
 logger/processing.log

@@ -13,20 +13,18 @@ type Response struct {
 }
 
 type ResponseTask struct {
-	Result ResponseResult `json:"result"`
+	Result int `json:"result"`
 }
 
-type ResponseResult struct {
-	Записи [][]any `json:"записи"`
-}
-
-func ExecuteRequestcreateRegistryOfIDs(request string, лицевойСчет int, config Config, token string) (resultRequest string, resultRow_id int, err error) {
+func ExecuteRequestNumRegistryOfIDs(request string, config Config, token string) (resultRequest string, resultRow_id int, err error) {
 	serverURL := ""
 	switch config.ConfigApp.Mode {
 	case "FL":
 		serverURL = config.ConfigApp.ServerURLFL
 	case "UL":
 		serverURL = config.ConfigApp.ServerURLUL
+	case "ASD":
+		serverURL = config.ConfigApp.ServerURLASD
 	}
 
 	body := strings.NewReader(request)
@@ -59,17 +57,11 @@ func ExecuteRequestcreateRegistryOfIDs(request string, лицевойСчет in
 	if json.Unmarshal(responseBody, &response) != nil {
 		return "", 0, fmt.Errorf("ExecuteRequestcreateRegistryOfIDs: ошибка: \n%w", err)
 	}
-	if len(response.Tasks) == 0 ||
-		len(response.Tasks[0].Result.Записи) == 0 ||
-		len(response.Tasks[0].Result.Записи[0]) == 0 {
+	if len(response.Tasks) == 0 {
 		return "", 0, fmt.Errorf("ExecuteRequestcreateRegistryOfIDs: запись не найдена")
 	}
-	number, ok := response.Tasks[0].Result.Записи[0][0].(float64)
-	if !ok {
-		return "", 0, fmt.Errorf("ExecuteRequestcreateRegistryOfIDs: $номерЗаписи имеет неожиданный тип")
-	}
 
-	resultRow_id = int(number)
+	resultRow_id = response.Tasks[0].Result
 	resultRequest = fmt.Sprintln(
 		"\nHTTP-запрос завершился успешно:", resp.Status,
 		"\nrow_id лицевого счета:", resultRow_id,
