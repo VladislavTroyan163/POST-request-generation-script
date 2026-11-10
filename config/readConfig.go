@@ -7,12 +7,14 @@ import (
 )
 
 type ConfigApp struct {
-	ServerURLFL            string `json:"serverURLFL"`
-	ServerURLUL            string `json:"serverURLUL"`
-	ServerURLAuthorization string `json:"serverURLAuthorization"`
-	WorkersCount           int    `json:"workersCount"`
-	Mode                   string `json:"mode"`
-	WorkMonth              string `json:"workMonth"`
+	ServerURLFL               string `json:"serverURLFL"`
+	ServerURLUL               string `json:"serverURLUL"`
+	ServerURLASD              string `json:"serverURLASD"`
+	ServerURLAuthorizationBil string `json:"serverURLAuthorizationBil"`
+	ServerURLAuthorizationASD string `json:"serverURLAuthorizationASD"`
+	WorkersCount              int    `json:"workersCount"`
+	Mode                      string `json:"mode"`
+	WorkMonth                 string `json:"workMonth"`
 }
 
 func ReadConfigApp() (ConfigApp, error) {

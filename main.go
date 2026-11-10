@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -44,10 +48,34 @@ func main() {
 		return
 	}
 	//----------------------------------------------------------------------------------
+	scanner := bufio.NewScanner(os.Stdin)
+
+	fmt.Print("Введите название файла: ")
+	scanner.Scan()
+	fileName := strings.TrimSpace(scanner.Text())
+
+	fmt.Print("Введите порядковый номер листа: ")
+	scanner.Scan()
+	sheetNumStr := strings.TrimSpace(scanner.Text())
+	sheetNumInt, err := strconv.Atoi(sheetNumStr)
+	if err != nil {
+		fmt.Println("Ошибка: порядковый номер листа - число!")
+		return
+	}
+
+	fmt.Print("Введите название столбца: ")
+	scanner.Scan()
+	columnName := strings.TrimSpace(scanner.Text())
+
+	if fileName == "" || columnName == "" {
+		fmt.Println("Ошибка: Название файла и столбца не могут быть пустыми!")
+		return
+	}
 
 	//Чтение реестра лицевых счетов
-	registryNumber, err := ReadRegistry(configApp.Mode, "registryLs.xlsx", 1, "Номер ЛС")
+	registryNumber, err := ReadRegistry(configApp.Mode, fileName, sheetNumInt, columnName)
 	if err != nil {
+		fmt.Println("main: ошибка чтения реестра: \n", err)
 		logger.Println(err)
 		return
 	}
@@ -71,12 +99,16 @@ func main() {
 		fmt.Println("main: ошибка чтения конфигурации: \n", err)
 		return
 	}
-	rowIDs := createregistryofidspack.CreateWorkersCreateRegistryOfIDs(
+	rowIDs, err := createregistryofidspack.CreateWorkersNumRegistryOfIDs(
 		registryNumber,
 		workersCount,
 		configCreateRegistryOfIDs,
 		tokenAuthorization,
 	)
+	if err != nil {
+		fmt.Println("main: ошибка преобразования реестра: \n", err)
+		return
+	}
 	fmt.Print(rowIDs)
 	//----------------------------------------------------------------------------------
 

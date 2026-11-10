@@ -14,6 +14,11 @@ type Config struct {
 }
 
 type ConfigRequest struct {
+	ObjectName string `json:"objectName"`
+	MethodName string `json:"methodName"`
+	TextMeter  string `json:"textMeter"`
+	TextLs     string `json:"textLs"`
+	TextTu     string `json:"textTu"`
 }
 
 func ReadConfig() (Config, error) {

@@ -1,19 +1,31 @@
 package createRegistryOfIDs
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"strconv"
 	"sync"
+	"time"
 
 	registriespack "github.com/VladislavTroyan163/POST-request-generation-script/registries"
 )
 
-func CreateWorkersCreateRegistryOfIDs(
+type Row_idObject struct {
+	Row_id  int    `json:"row_id"`
+	Numbers string `json:"numbers"`
+}
+
+func CreateWorkersNumRegistryOfIDs(
 	registryNumber []registriespack.Numbers,
 	workersCount int,
 	configCreateRegistryOfIDs Config,
 	tokenAuthorization string,
-) []int {
+) ([]int, error) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
+	var fileName string
+	row_idObject := []Row_idObject{}
 	jobs := make(chan int)
 	rowIDs := make([]int, 0, len(registryNumber))
 
@@ -23,27 +35,36 @@ func CreateWorkersCreateRegistryOfIDs(
 			defer wg.Done()
 			for i := range jobs {
 				лицевойСчет := 0
-				// start := time.Now()
+				номерПУ := ""
+				logNumber := ""
+
 				switch configCreateRegistryOfIDs.ConfigApp.Mode {
 				case "FL":
 					лицевойСчет = registryNumber[i].Numbers_ls
+					fileName = "registries/registryLs/registryLs.json"
+					logNumber = strconv.Itoa(лицевойСчет)
 				case "UL":
 					лицевойСчет = registryNumber[i].Numbers_tu
+					fileName = "registries/registryTu/registryTu.json"
+					logNumber = strconv.Itoa(лицевойСчет)
+				case "ASD":
+					номерПУ = registryNumber[i].Numbers_meter
+					fileName = "registries/registryMeter/registryMeter.json"
+					logNumber = номерПУ
 				}
-
-				requestNumbers, err := CreateRequestСreateRegistryOfIDs(лицевойСчет, configCreateRegistryOfIDs)
+				start := time.Now()
+				requestNumbers, err := CreateRequestNumRegistryOfIDs(лицевойСчет, номерПУ, configCreateRegistryOfIDs)
 				if err != nil {
 					break
 				}
 
-				_, row_id, err := ExecuteRequestcreateRegistryOfIDs(requestNumbers, лицевойСчет, configCreateRegistryOfIDs, tokenAuthorization)
+				_, row_id, err := ExecuteRequestNumRegistryOfIDs(requestNumbers, configCreateRegistryOfIDs, tokenAuthorization)
 
-				// elapsed := time.Since(start)
-				// if err != nil {
-				// 	continue
-				// }
+				elapsed := time.Since(start)
+				fmt.Printf("Лицевому счету %d соответствует row id: %d\nВремя выполнения запроса: %v\n\n", лицевойСчет, row_id, elapsed)
 
 				mu.Lock()
+				row_idObject = append(row_idObject, Row_idObject{Row_id: row_id, Numbers: logNumber})
 				rowIDs = append(rowIDs, row_id)
 				mu.Unlock()
 			}
@@ -56,5 +77,21 @@ func CreateWorkersCreateRegistryOfIDs(
 	close(jobs)
 
 	wg.Wait()
-	return rowIDs
+
+	jsonData, err := json.MarshalIndent(row_idObject, "", "    ")
+	if err != nil {
+		return []int{}, fmt.Errorf("CreateRequestСreateRegistryOfIDs: ошибка сериализации: \n%w", err)
+	}
+
+	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+		return []int{}, fmt.Errorf("CreateWorkersNumRegistryOfIDs: ошибка чтения файла: \n%w", err)
+	}
+	defer file.Close()
+
+	file.Write(jsonData)
+	fmt.Println("Файл перезаписан новым слайсом")
+
+	return rowIDs, nil
 }

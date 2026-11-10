@@ -38,10 +38,15 @@ type GraphQLError struct {
 }
 
 func ExecuteRequestAuthorization(request string, config Config) (resultRequest string, err error) {
+	serverURL := config.ConfigApp.ServerURLAuthorizationBil
+	if config.ConfigApp.Mode == "ASD" {
+		serverURL = config.ConfigApp.ServerURLAuthorizationASD
+	}
+
 	body := strings.NewReader(request)
 	req, err := http.NewRequest(
 		http.MethodPost,
-		config.ConfigApp.ServerURLAuthorization,
+		serverURL,
 		body,
 	)
 	if err != nil {
