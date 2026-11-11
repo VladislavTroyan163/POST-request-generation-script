@@ -7,4 +7,4 @@ registries/registryLs/*
 registries/registryTu/*
 registries/registryMeter/*
 
-logger/processing.log
+logger/logs/*

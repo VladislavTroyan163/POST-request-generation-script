@@ -1,115 +1,94 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
+	"log"
 	"sync"
 	"time"
 
 	configpack "github.com/VladislavTroyan163/POST-request-generation-script/config"
-	. "github.com/VladislavTroyan163/POST-request-generation-script/logger"
-	. "github.com/VladislavTroyan163/POST-request-generation-script/registries"
+	loggerpack "github.com/VladislavTroyan163/POST-request-generation-script/logger"
+	registriespack "github.com/VladislavTroyan163/POST-request-generation-script/registries"
 	authorizationpack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/authorization"
 	changesupplierspack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/changeSupplier"
 	createregistryofidspack "github.com/VladislavTroyan163/POST-request-generation-script/requestsModules/createRegistryOfIDs"
+	utilspack "github.com/VladislavTroyan163/POST-request-generation-script/utils"
 )
 
 func main() {
-	//Создание логирования
-	logger, logFile := CreateLogger()
+	//Создание логирования main
+	logger, logFile, err := loggerpack.CreateLogger("main")
+	if err != nil {
+		log.Fatal("main: ошибка создания логера: \n", err)
+	}
 	defer logFile.Close()
 	//----------------------------------------------------------------------------------
 
 	//Чтение конфига приложения
 	configApp, err := configpack.ReadConfigApp()
 	if err != nil {
-		fmt.Println("main: ошибка чтения конфигурации приложения: \n", err)
+		logger.Println("main: ошибка чтения конфигурации приложения: \n", err)
 		return
 	}
+	logger.Println("main: конфигурация прочитана успешно")
 	//----------------------------------------------------------------------------------
 
 	//Авторизация: конфигурация, формирование запроса, выполнение запроса.
-	configAuthorization, err := authorizationpack.ReadConfig()
+	tokenAuthorization, err := authorizationpack.GetTokenAuthorization()
 	if err != nil {
-		fmt.Println("main: ошибка чтения конфигурации: \n", err)
+		logger.Println("main: ошибка при выполнении запроса авторизации: \n", err)
 		return
 	}
-	requestAuthorization, err := authorizationpack.CreateRequestAuthorization()
-	if err != nil {
-		fmt.Println("main: ошибка при создании запроса авторизации: \n", err)
-		return
-	}
-	tokenAuthorization, err := authorizationpack.ExecuteRequestAuthorization(requestAuthorization, configAuthorization)
-	if err != nil {
-		fmt.Println("main: ошибка при выполнении запроса авторизации: \n", err)
-		return
-	}
+	logger.Println("main: авторизация прошла успешно")
 	//----------------------------------------------------------------------------------
-	scanner := bufio.NewScanner(os.Stdin)
 
-	fmt.Print("Введите название файла: ")
-	scanner.Scan()
-	fileName := strings.TrimSpace(scanner.Text())
-
-	fmt.Print("Введите порядковый номер листа: ")
-	scanner.Scan()
-	sheetNumStr := strings.TrimSpace(scanner.Text())
-	sheetNumInt, err := strconv.Atoi(sheetNumStr)
+	//Получние от пользователя настроек загружаемого файла.
+	fileName, sheetNumInt, columnName, err := utilspack.ReadConsoleSettingsFile()
 	if err != nil {
-		fmt.Println("Ошибка: порядковый номер листа - число!")
+		logger.Println("main:\nReadConsoleSettingsFile: \n", err)
 		return
 	}
-
-	fmt.Print("Введите название столбца: ")
-	scanner.Scan()
-	columnName := strings.TrimSpace(scanner.Text())
-
-	if fileName == "" || columnName == "" {
-		fmt.Println("Ошибка: Название файла и столбца не могут быть пустыми!")
-		return
-	}
+	logger.Println("main: настройки загружаемого файла получены")
+	//----------------------------------------------------------------------------------
 
 	//Чтение реестра лицевых счетов
-	registryNumber, err := ReadRegistry(configApp.Mode, fileName, sheetNumInt, columnName)
+	registryNumber, err := registriespack.ReadRegistry(configApp.Mode, fileName, sheetNumInt, columnName)
 	if err != nil {
-		fmt.Println("main: ошибка чтения реестра: \n", err)
-		logger.Println(err)
+		logger.Println("main: ошибка чтения реестра: \n", err)
 		return
 	}
+	logger.Println("main: чтение реестра прошло успешно")
 	//----------------------------------------------------------------------------------
 
 	//Установка количества потоков
-	workersCount := configApp.WorkersCount
-
-	if len(registryNumber) < workersCount {
-		workersCount = len(registryNumber)
-	}
+	workersCount := utilspack.GetWorkersCount(configApp.WorkersCount, len(registryNumber))
 	if workersCount == 0 {
-		logger.Println("Реестр пуст")
+		logger.Println("main: число потоков не может быть равно нулю!")
 		return
 	}
+	logger.Println("main: число потоков установлено:", workersCount)
 	//----------------------------------------------------------------------------------
 
-	//Перевод объектов реестра в формат списка row_id
-	configCreateRegistryOfIDs, err := createregistryofidspack.ReadConfig()
-	if err != nil {
-		fmt.Println("main: ошибка чтения конфигурации: \n", err)
-		return
-	}
-	rowIDs, err := createregistryofidspack.CreateWorkersNumRegistryOfIDs(
+	//Преобразование объектов реестра к виду .json списка
+	err = createregistryofidspack.CreateWorkersNumRegistryOfIDs(
 		registryNumber,
 		workersCount,
-		configCreateRegistryOfIDs,
 		tokenAuthorization,
 	)
 	if err != nil {
-		fmt.Println("main: ошибка преобразования реестра: \n", err)
+		logger.Println("main: ошибка преобразования реестра: \n", err)
 		return
 	}
-	fmt.Print(rowIDs)
+	logger.Println("main: номера успешно переведены в row_id и сохранены")
+	//----------------------------------------------------------------------------------
+
+	//Преобразование .json списка к виду объекта
+	rowIDs, err := createregistryofidspack.ReadFileId()
+	if err != nil {
+		logger.Println("main: ошибка преобразования .json к виду объекта: \n", err)
+		return
+	}
+	logger.Println("main: .json успешно приведен к виду объекта")
 	//----------------------------------------------------------------------------------
 
 	var wg sync.WaitGroup
@@ -129,23 +108,23 @@ func main() {
 			defer wg.Done()
 			for i := range jobs {
 				start := time.Now()
-				лицевойСчет := rowIDs[i]
+				row_idLsTu := rowIDs[i].Row_id
 
-				request, err := changesupplierspack.CreateRequestChangeSupplier(лицевойСчет, configChangeSuppliers)
+				request, err := changesupplierspack.CreateRequestChangeSupplier(row_idLsTu, configChangeSuppliers)
 				if err != nil {
 					logger.Printf(
 						"ЛС %d: ошибка создания запроса: %v",
-						лицевойСчет, err)
+						row_idLsTu, err)
 					break
 				}
 
-				resultRequest, err := changesupplierspack.ExecuteRequestChangeSupplier(request, лицевойСчет, configChangeSuppliers, tokenAuthorization)
+				resultRequest, err := changesupplierspack.ExecuteRequestChangeSupplier(request, row_idLsTu, configChangeSuppliers, tokenAuthorization)
 
 				elapsed := time.Since(start)
 				if err != nil {
 					logger.Printf(
 						"ЛС %d: ошибка HTTP-запроса: %v \n\n",
-						лицевойСчет, err)
+						row_idLsTu, err)
 					continue
 				}
 				fmt.Println("Результат запроса:", resultRequest)

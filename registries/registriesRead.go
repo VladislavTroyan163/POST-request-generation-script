@@ -92,6 +92,9 @@ func ReadRegistry(mode string, fileName string, sheetNum int, colName string) ([
 
 		}
 	}
+	if len(resultNumbers) == 0 {
+		return []Numbers{}, fmt.Errorf("Реестр пуст")
+	}
 
 	return resultNumbers, nil
 }

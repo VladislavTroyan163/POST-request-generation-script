@@ -1,24 +1,28 @@
 package logger
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"os"
+	"time"
 )
 
-func CreateLogger() (*log.Logger, *os.File) {
-	logFile, err := os.OpenFile(
-		"logger\\processing.log",
-		os.O_CREATE|os.O_WRONLY|os.O_APPEND,
-		0666,
-	)
+func CreateLogger(processingName string) (*log.Logger, *os.File, error) {
+	now := time.Now()
+	filePath := fmt.Sprintf("logger/logs/processing_%s_%s.log", processingName, now.UTC().Format("20060102_150405"))
+	logFile, err := os.Create(filePath)
+
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, fmt.Errorf("ReadFileId: ошибка чтения файла: \n%w", err)
 	}
 
+	mw := io.MultiWriter(logFile, os.Stdout)
+
 	logger := log.New(
-		logFile,
+		mw,
 		"",
 		log.Ldate|log.Ltime|log.Lmicroseconds,
 	)
-	return logger, logFile
+	return logger, logFile, nil
 }

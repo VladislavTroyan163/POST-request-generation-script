@@ -19,15 +19,19 @@ type Row_idObject struct {
 func CreateWorkersNumRegistryOfIDs(
 	registryNumber []registriespack.Numbers,
 	workersCount int,
-	configCreateRegistryOfIDs Config,
 	tokenAuthorization string,
-) ([]int, error) {
+) error {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	var fileName string
 	row_idObject := []Row_idObject{}
 	jobs := make(chan int)
 	rowIDs := make([]int, 0, len(registryNumber))
+
+	configCreateRegistryOfIDs, err := ReadConfig()
+	if err != nil {
+		return fmt.Errorf("CreateRequestСreateRegistryOfIDs: ошибка чтения конфигурации: \n%w", err)
+	}
 
 	for w := 0; w < workersCount; w++ {
 		wg.Add(1)
@@ -80,18 +84,17 @@ func CreateWorkersNumRegistryOfIDs(
 
 	jsonData, err := json.MarshalIndent(row_idObject, "", "    ")
 	if err != nil {
-		return []int{}, fmt.Errorf("CreateRequestСreateRegistryOfIDs: ошибка сериализации: \n%w", err)
+		return fmt.Errorf("CreateRequestСreateRegistryOfIDs: ошибка сериализации: \n%w", err)
 	}
 
 	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Println("Ошибка:", err)
-		return []int{}, fmt.Errorf("CreateWorkersNumRegistryOfIDs: ошибка чтения файла: \n%w", err)
+		return fmt.Errorf("CreateWorkersNumRegistryOfIDs: ошибка чтения файла: \n%w", err)
 	}
 	defer file.Close()
 
 	file.Write(jsonData)
-	fmt.Println("Файл перезаписан новым слайсом")
 
-	return rowIDs, nil
+	return nil
 }

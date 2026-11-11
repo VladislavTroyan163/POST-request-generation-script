@@ -97,3 +97,20 @@ func ExecuteRequestAuthorization(request string, config Config) (resultRequest s
 
 	return token, nil
 }
+
+func GetTokenAuthorization() (string, error) {
+	//Авторизация: конфигурация, формирование запроса, выполнение запроса.
+	configAuthorization, err := ReadConfig()
+	if err != nil {
+		return "", fmt.Errorf("GetTokenAuthorization: ошибка чтения конфигурации: \n%w", err)
+	}
+	requestAuthorization, err := CreateRequestAuthorization()
+	if err != nil {
+		return "", fmt.Errorf("GetTokenAuthorization: ошибка при создании запроса авторизации: \n%w", err)
+	}
+	tokenAuthorization, err := ExecuteRequestAuthorization(requestAuthorization, configAuthorization)
+	if err != nil {
+		return "", fmt.Errorf("GetTokenAuthorization: ошибка при выполнении запроса авторизации: \n%w", err)
+	}
+	return tokenAuthorization, nil
+}

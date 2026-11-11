@@ -45,3 +45,31 @@ func ReadConfig() (Config, error) {
 	}
 	return Config, nil
 }
+
+func ReadFileId() ([]Row_idObject, error) {
+
+	config, err := ReadConfig()
+	if err != nil {
+		return []Row_idObject{}, fmt.Errorf("ReadFileId: ошибка чтения конфигурации: \n%w", err)
+	}
+	fileName := ""
+	switch config.ConfigApp.Mode {
+	case "FL":
+		fileName = "registries/registryLs/registryLs.json"
+	case "UL":
+		fileName = "registries/registryTu/registryTu.json"
+	case "ASD":
+		fileName = "registries/registryMeter/registryMeter.json"
+	}
+	data, err := os.ReadFile(fileName)
+	if err != nil {
+		return []Row_idObject{}, fmt.Errorf("ReadFileId: ошибка чтения файла: \n%w", err)
+	}
+
+	var row_idNum []Row_idObject
+	err = json.Unmarshal(data, &row_idNum)
+	if err != nil {
+		return []Row_idObject{}, fmt.Errorf("ReadFileId: ошибка сериализации: \n%w", err)
+	}
+	return row_idNum, nil
+}
