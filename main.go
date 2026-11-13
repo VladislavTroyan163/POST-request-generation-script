@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"sync"
-	"time"
 
 	configpack "github.com/VladislavTroyan163/POST-request-generation-script/config"
 	loggerpack "github.com/VladislavTroyan163/POST-request-generation-script/logger"
@@ -91,60 +88,16 @@ func main() {
 	logger.Println("main: .json успешно приведен к виду объекта")
 	//----------------------------------------------------------------------------------
 
-	var wg sync.WaitGroup
-	jobs := make(chan int)
-
-	configChangeSuppliers, err := changesupplierspack.ReadConfig()
+	//Отправка запросов на проставление поставщиков
+	err = changesupplierspack.CreateWorkersChangeSupplier(
+		workersCount,
+		tokenAuthorization,
+		rowIDs,
+	)
 	if err != nil {
-		fmt.Println("main: ошибка чтения конфигурации: \n", err)
+		logger.Println("main: ошибка при проставлении поставщиков: \n", err)
 		return
 	}
-
-	startAll := time.Now()
-
-	for w := 0; w < workersCount; w++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for i := range jobs {
-				start := time.Now()
-				row_idLsTu := rowIDs[i].Row_id
-
-				request, err := changesupplierspack.CreateRequestChangeSupplier(row_idLsTu, configChangeSuppliers)
-				if err != nil {
-					logger.Printf(
-						"ЛС %d: ошибка создания запроса: %v",
-						row_idLsTu, err)
-					break
-				}
-
-				resultRequest, err := changesupplierspack.ExecuteRequestChangeSupplier(request, row_idLsTu, configChangeSuppliers, tokenAuthorization)
-
-				elapsed := time.Since(start)
-				if err != nil {
-					logger.Printf(
-						"ЛС %d: ошибка HTTP-запроса: %v \n\n",
-						row_idLsTu, err)
-					continue
-				}
-				fmt.Println("Результат запроса:", resultRequest)
-				logger.Printf(
-					"Результат: %vВремя выполнения запроса: %v\n\n",
-					resultRequest,
-					elapsed,
-				)
-			}
-		}()
-	}
-
-	for i := range registryNumber {
-		jobs <- i
-	}
-	close(jobs)
-
-	wg.Wait()
-
-	logger.Printf("Всего обработано заданий: %d\n",
-		len(registryNumber))
-	logger.Printf("Общее время: %v\n", time.Since(startAll))
+	logger.Println("main: поставщики проставлены успешно")
+	//----------------------------------------------------------------------------------
 }

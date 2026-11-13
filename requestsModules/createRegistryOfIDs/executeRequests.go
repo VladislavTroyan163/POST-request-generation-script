@@ -64,7 +64,7 @@ func ExecuteRequestNumRegistryOfIDs(request string, config Config, token string)
 	resultRow_id = response.Tasks[0].Result
 	resultRequest = fmt.Sprintln(
 		"\nHTTP-запрос завершился успешно:", resp.Status,
-		"\nrow_id лицевого счета:", resultRow_id,
+		"\nrow_id:", resultRow_id,
 	)
 
 	return resultRequest, resultRow_id, nil

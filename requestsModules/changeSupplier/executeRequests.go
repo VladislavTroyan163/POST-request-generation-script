@@ -22,11 +22,14 @@ type ResponseResult struct {
 
 func ExecuteRequestChangeSupplier(request string, лицевойСчет int, config Config, token string) (resultRequest string, err error) {
 	serverURL := ""
+	resulttText := ""
 	switch config.ConfigApp.Mode {
 	case "FL":
 		serverURL = config.ConfigApp.ServerURLFL
+		resulttText = "\nrow_id лицевого счета:"
 	case "UL":
 		serverURL = config.ConfigApp.ServerURLUL
+		resulttText = "\nrow_id точки учета:"
 	}
 
 	body := strings.NewReader(request)
@@ -64,13 +67,18 @@ func ExecuteRequestChangeSupplier(request string, лицевойСчет int, co
 			return "", fmt.Errorf("ExecuteRequestChangeSupplier: ошибка: \n%w", err)
 		}
 		resultRequest = fmt.Sprintln(
-			"\nHTTP-запрос завершился успешно:", resp.Status,
-			"\nНомер записи в таблице \"Поставщики\":", response.Tasks[0].Result.НомерЗаписи,
-			"\nrow_id лицевого счета:", лицевойСчет)
+			"\nHTTP-запрос завершился успешно:",
+			resp.Status,
+			"\nНомер записи в таблице \"Поставщики\":",
+			response.Tasks[0].Result.НомерЗаписи,
+			resulttText,
+			лицевойСчет)
 	default:
 		resultRequest = fmt.Sprintln(
-			"HTTP-запрос завершился неуспешно:", resp.Status,
-			"\nrow_id лицевого счета:", лицевойСчет)
+			"HTTP-запрос завершился неуспешно:",
+			resp.Status,
+			resulttText,
+			лицевойСчет)
 	}
 	return resultRequest, nil
 }
